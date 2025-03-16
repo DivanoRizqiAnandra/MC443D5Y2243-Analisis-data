@@ -3,7 +3,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-data_hour = pd.read_csv("main_data.csv")  # Langsung baca tanpa fungsi
+data_hour = pd.read_csv("https://github.com/DivanoRizqiAnandra/MC443D5Y2243-Analisis-data/blob/main/Dashboard/main_data.csv") 
 
 def rental_category(total):
     if total < 100:
