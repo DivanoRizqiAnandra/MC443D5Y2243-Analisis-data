@@ -3,9 +3,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-# Load data
-def load_data():
-    return pd.read_csv("main_data.csv")
+data_hour = pd.read_csv("main_data.csv")  # Langsung baca tanpa fungsi
 
 def rental_category(total):
     if total < 100:
@@ -63,7 +61,6 @@ def plot_hourly_usage(data):
 # Judul aplikasi
 st.title("Analisis Data Bike Sharing")
 
-data_hour = load_data()
 data_hour = preprocess_data(data_hour)
 
 # Pilihan visualisasi
