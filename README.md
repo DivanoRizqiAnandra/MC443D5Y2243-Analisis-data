@@ -24,7 +24,7 @@
     ```
     Mengaktifkan virtual environtment
 
-        ```sh
+   ```sh
     pipenv shell
     ```
 
