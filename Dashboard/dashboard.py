@@ -3,7 +3,8 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-data_hour = pd.read_csv("https://github.com/DivanoRizqiAnandra/MC443D5Y2243-Analisis-data/blob/main/Dashboard/main_data.csv") 
+csv_url = "https://raw.githubusercontent.com/DivanoRizqiAnandra/MC443D5Y2243-Analisis-data/refs/heads/main/Dashboard/main_data.csv"
+data_hour = pd.read_csv(csv_url)
 
 def rental_category(total):
     if total < 100:
@@ -35,7 +36,6 @@ def plot_total_rentals(data):
 
 def plot_highest_lowest_rentals(data):
     seasonal_rentals = data.groupby("season")["total"].agg(["max", "min"]).reset_index()
-    seasonal_rentals["season"] = range(len(seasonal_rentals))
     
     fig, ax = plt.subplots(figsize=(10, 5))
     sns.scatterplot(x=seasonal_rentals["season"], y=seasonal_rentals["max"], color="red", s=100, label="Highest Rental", ax=ax)
@@ -61,6 +61,7 @@ def plot_hourly_usage(data):
 # Judul aplikasi
 st.title("Analisis Data Bike Sharing")
 
+# Preprocessing data
 data_hour = preprocess_data(data_hour)
 
 # Pilihan visualisasi
@@ -70,10 +71,10 @@ option = st.selectbox("Pilih Visualisasi:", [
     "Hourly Usage Pattern"
 ])
 
+# Tampilkan visualisasi sesuai pilihan
 if option == "Total Rentals per Season":
     plot_total_rentals(data_hour)
 elif option == "Highest and Lowest Rentals per Season":
     plot_highest_lowest_rentals(data_hour)
 elif option == "Hourly Usage Pattern":
     plot_hourly_usage(data_hour)
-
