@@ -1,1 +1,1 @@
-https://divanorizqianandra-analytics-bikesharing.streamlit.app/
+https://divanorizqianandra-analytics-bikesharing.streamlit.app
