@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 # Load data
 def load_data():
-    return pd.read_csv("main_data.csv")
+    return pd.read_csv("/main_data.csv")
 
 def rental_category(total):
     if total < 100:
