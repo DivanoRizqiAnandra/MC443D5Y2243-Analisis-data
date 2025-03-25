@@ -3,8 +3,20 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+# Konfigurasi tampilan
+st.set_page_config(page_title="Bike Sharing Dashboard", layout="wide")
+st.markdown("""
+    <style>
+    .big-font { font-size:20px !important; font-weight: bold; }
+    </style>
+""", unsafe_allow_html=True)
+
+# Load data
 csv_url = "https://raw.githubusercontent.com/DivanoRizqiAnandra/MC443D5Y2243-Analisis-data/refs/heads/main/Dashboard/main_data.csv"
 data_hour = pd.read_csv(csv_url)
+
+# Konversi kolom tanggal jika ada
+data_hour['date'] = pd.to_datetime(data_hour['date'])
 
 def rental_category(total):
     if total < 100:
@@ -21,6 +33,31 @@ def preprocess_data(data):
     data["time_of_day"] = pd.cut(data["hour"], bins=bins, labels=labels, right=False)
     return data
 
+data_hour = preprocess_data(data_hour)
+
+# Sidebar Filters
+st.sidebar.header("📌 Filter Data")
+start_date = st.sidebar.date_input("Tanggal Awal", data_hour['date'].min())
+end_date = st.sidebar.date_input("Tanggal Akhir", data_hour['date'].max())
+season_filter = st.sidebar.multiselect("Musim", options=data_hour['season'].unique(), default=data_hour['season'].unique())
+weather_filter = st.sidebar.multiselect("Cuaca", options=data_hour['weather'].unique(), default=data_hour['weather'].unique())
+hour_range = st.sidebar.slider("Jam", min_value=0, max_value=23, value=(0, 23))
+renter_category = st.sidebar.selectbox("Kategori Penyewa", ["Semua", "Casual", "Registered"])
+
+# Apply Filters
+filtered_data = data_hour[
+    (data_hour['date'] >= pd.to_datetime(start_date)) &
+    (data_hour['date'] <= pd.to_datetime(end_date)) &
+    (data_hour['season'].isin(season_filter)) &
+    (data_hour['weather'].isin(weather_filter)) &
+    (data_hour['hour'].between(hour_range[0], hour_range[1])) 
+]
+
+if renter_category == "Casual":
+    filtered_data["total"] = filtered_data["casual"]
+elif renter_category == "Registered":
+    filtered_data["total"] = filtered_data["registered"]
+
 def plot_total_rentals(data):
     seasonal_rentals = data.groupby("season")["total"].sum().reset_index()
     season_order = ["Spring", "Summer", "Fall", "Winter"]
@@ -32,18 +69,6 @@ def plot_total_rentals(data):
     plt.xlabel("Season")
     plt.ylabel("Total Rentals")
     plt.title("Total Rentals per Season")
-    st.pyplot(fig)
-
-def plot_highest_lowest_rentals(data):
-    seasonal_rentals = data.groupby("season")["total"].agg(["max", "min"]).reset_index()
-    
-    fig, ax = plt.subplots(figsize=(10, 5))
-    sns.scatterplot(x=seasonal_rentals["season"], y=seasonal_rentals["max"], color="red", s=100, label="Highest Rental", ax=ax)
-    sns.scatterplot(x=seasonal_rentals["season"], y=seasonal_rentals["min"], color="blue", s=100, label="Lowest Rental", ax=ax)
-    plt.title("Jumlah Penyewa Tertinggi dan Terendah per Musim")
-    plt.xlabel("Musim")
-    plt.ylabel("Jumlah Penyewa")
-    plt.legend()
     st.pyplot(fig)
 
 def plot_hourly_usage(data):
@@ -59,22 +84,22 @@ def plot_hourly_usage(data):
     st.pyplot(fig)
 
 # Judul aplikasi
-st.title("Analisis Data Bike Sharing")
-
-# Preprocessing data
-data_hour = preprocess_data(data_hour)
+st.title("🚲 Bike Sharing Dashboard")
+st.markdown('<p class="big-font">Analisis Data Penyewaan Sepeda</p>', unsafe_allow_html=True)
 
 # Pilihan visualisasi
-option = st.selectbox("Pilih Visualisasi:", [
-    "Total Rentals per Season",
-    "Highest and Lowest Rentals per Season",
-    "Hourly Usage Pattern"
-])
+tabs = st.tabs(["📊 Total Penyewaan per Musim", "📈 Pola Penggunaan per Jam"])
 
-# Tampilkan visualisasi sesuai pilihan
-if option == "Total Rentals per Season":
-    plot_total_rentals(data_hour)
-elif option == "Highest and Lowest Rentals per Season":
-    plot_highest_lowest_rentals(data_hour)
-elif option == "Hourly Usage Pattern":
-    plot_hourly_usage(data_hour)
+with tabs[0]:
+    plot_total_rentals(filtered_data)
+
+with tabs[1]:
+    plot_hourly_usage(filtered_data)
+
+# Menampilkan data yang difilter
+st.write("## 🗂 Hasil Data yang Telah di Filter")
+st.dataframe(filtered_data)
+
+# Download Button
+st.download_button(label="📥 Download Data yang Telah di Filter", data=filtered_data.to_csv(index=False), file_name="filtered_data.csv", mime="text/csv")
+
